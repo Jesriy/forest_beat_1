@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>谱面分析工具 · Forest Beat</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "PingFang SC", "Microsoft YaHei", "Segoe UI", system-ui, sans-serif;
+      background: #0e1a13; color: #eafff2;
+      padding: 24px 16px 60px; line-height: 1.6;
+    }
+    .wrap { max-width: 860px; margin: 0 auto; }
+    h1 { font-size: 26px; margin-bottom: 4px; }
+    .sub { opacity: .65; font-size: 14px; margin-bottom: 22px; }
+    a { color: #7be3aa; }
+    .card {
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 16px; padding: 20px; margin-bottom: 18px;
+    }
+    .card h2 { font-size: 18px; margin-bottom: 12px; }
+    label { display: block; font-size: 14px; margin: 10px 0 4px; opacity: .85; }
+    input[type=file] { width: 100%; font-size: 14px; }
+    input[type=number] {
+      width: 110px; padding: 8px 10px; border-radius: 8px;
+      border: 1px solid rgba(255,255,255,.2);
+      background: #122019; color: #fff; font: inherit;
+    }
+    button {
+      margin-top: 14px;
+      padding: 11px 22px; border: none; border-radius: 10px;
+      background: linear-gradient(135deg, #58e09a, #2fbd6f);
+      color: #08210f; font-weight: 700; font-size: 15px;
+      cursor: pointer;
+    }
+    button:disabled { opacity: .4; cursor: not-allowed; }
+    button.ghost { background: rgba(255,255,255,.12); color: #eafff2; margin-left: 8px; }
+    .status { font-size: 13.5px; margin-top: 10px; min-height: 20px; color: #9be7ff; }
+    .status.err { color: #ff9d96; }
+    pre {
+      margin-top: 12px; max-height: 280px; overflow: auto;
+      background: #0a130d; border: 1px solid rgba(255,255,255,.1);
+      border-radius: 10px; padding: 12px; font-size: 12px;
+      white-space: pre-wrap; word-break: break-all;
+    }
+    .tip { font-size: 13px; opacity: .6; margin-top: 14px; }
+    .row { display: flex; gap: 18px; flex-wrap: wrap; }
+    .row > div { flex: 1; min-width: 150px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>谱面分析工具</h1>
+    <p class="sub">
+      上传你的 MP3 / WAV / OGG，浏览器本地（不上传任何服务器）自动检测 BPM、节拍、onset 与频段能量，
+    生成谱面 JSON。完成后点击“下载”，用它覆盖项目中的
+    <code>src/charts/level1.json</code> 或 <code>src/charts/level2.json</code>，
+    然后重新执行 <code>npm run build</code> 并部署 <code>dist</code> 即可。
+      <a href="./">← 返回首页</a>
+    </p>
+
+    <div class="card">
+      <h2>关卡 1（苏醒的森林 · 目标 60% · 宽松）</h2>
+      <label>音乐文件（level1.mp3）</label>
+      <input type="file" id="file1" accept="audio/*" />
+      <div class="row">
+        <div>
+          <label>BPM 覆盖（留空=自动检测）</label>
+          <input type="number" id="bpm1" min="50" max="220" placeholder="自动" />
+        </div>
+        <div>
+          <label>Offset 微调（秒）</label>
+          <input type="number" id="off1" step="0.01" value="0" />
+        </div>
+      </div>
+      <button id="go1">分析并生成 level1.json</button>
+      <button id="dl1" class="ghost" disabled>下载 level1.json</button>
+      <div id="status1" class="status"></div>
+      <pre id="out1" hidden></pre>
+    </div>
+
+    <div class="card">
+      <h2>关卡 2（林城交响 · 目标 70% · 严格）</h2>
+      <label>音乐文件（level2.mp3）</label>
+      <input type="file" id="file2" accept="audio/*" />
+      <div class="row">
+        <div>
+          <label>BPM 覆盖（留空=自动检测）</label>
+          <input type="number" id="bpm2" min="50" max="220" placeholder="自动" />
+        </div>
+        <div>
+          <label>Offset 微调（秒）</label>
+          <input type="number" id="off2" step="0.01" value="0" />
+        </div>
+      </div>
+      <button id="go2">分析并生成 level2.json</button>
+      <button id="dl2" class="ghost" disabled>下载 level2.json</button>
+      <div id="status2" class="status"></div>
+      <pre id="out2" hidden></pre>
+    </div>
+
+    <p class="tip">
+      说明：BPM 检测采用低频能量自相关（60–180 BPM）；低频强→大块，中频→中块，高频→小块；
+      音符自动对齐 1/4 与 1/8 拍（关卡 2 含 1/16 阶梯），相邻音符最小间隔 80ms。
+      若生成结果偏密/偏疏，可换一首鼓点更清晰的音乐，或手动编辑 JSON 增删 notes。
+    </p>
+  </div>
+
+  <script type="module" src="./src/analyzerApp.js"></script>
+</body>
+</html>

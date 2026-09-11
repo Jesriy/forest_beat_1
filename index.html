@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#101b14" />
+  <!-- PWA / 移动端主屏 -->
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Forest Beat" />
+  <link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png" />
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
+  <title>Forest Beat · 林与城的音游</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div id="app">
+
+    <!-- ============ 首页 ============ -->
+    <section id="home-screen" class="screen active">
+      <canvas id="three-canvas"></canvas>
+      <div class="home-shade"></div>
+
+      <div class="home-overlay">
+        <h1 class="game-title">FOREST&nbsp;BEAT</h1>
+        <p class="game-subtitle">林与城的节奏之旅</p>
+        <div id="thanks-badge" class="thanks-badge" hidden>✦ 感谢游玩 ✦</div>
+
+        <div class="home-menu">
+          <button id="btn-start" class="btn btn-primary">开始游戏</button>
+
+          <div id="level-panel" class="level-panel" hidden>
+            <button class="btn btn-level" data-level="1">
+              <span class="lv-name">关卡 1 · 苏醒的森林</span>
+              <span class="lv-desc">慢速 · 宽松判定 · 目标 60%</span>
+            </button>
+            <button class="btn btn-level" data-level="2" disabled>
+              <span class="lv-name">关卡 2 · 林城交响 <span class="lock-icon">🔒</span></span>
+              <span class="lv-desc">快速 · 严格判定 · 目标 70%</span>
+            </button>
+          </div>
+
+          <div class="home-row">
+            <button id="btn-settings" class="btn btn-ghost">设置</button>
+            <button id="btn-reset" class="btn btn-ghost danger">重置进度</button>
+          </div>
+          <a class="analyzer-link" href="./analyzer.html" target="_blank">谱面分析工具 →</a>
+        </div>
+      </div>
+
+      <div id="model-loading" class="model-loading" hidden>
+        <div class="model-loading-box">
+          <div class="spinner"></div>
+          <p>正在加载模型… <span id="model-percent">0%</span></p>
+        </div>
+      </div>
+      <div id="model-toast" class="model-toast" hidden></div>
+    </section>
+
+    <!-- ============ 游戏页 ============ -->
+    <section id="game-screen" class="screen">
+      <canvas id="game-canvas"></canvas>
+
+      <div class="hud">
+        <div class="hud-main">
+          <div class="hud-stat"><span class="hud-label">分数</span><b id="hud-score">0</b></div>
+          <div class="hud-stat"><span class="hud-label">连击</span><b id="hud-combo">0</b></div>
+          <div class="hud-stat"><span class="hud-label">准确率</span><b id="hud-acc">100%</b></div>
+          <div class="hud-stat"><span class="hud-label">通关目标</span><b id="hud-target">0</b></div>
+        </div>
+        <div class="hud-actions">
+          <button id="btn-pause" class="btn btn-small">暂停</button>
+          <button id="btn-exit" class="btn btn-small">退出</button>
+        </div>
+        <div class="progress-wrap"><div id="progress-bar" class="progress-bar"></div></div>
+      </div>
+
+      <div class="lane-labels">
+        <span>D</span><span>F</span><span>J</span><span>K</span>
+      </div>
+
+      <div id="countdown" class="countdown" hidden></div>
+
+      <div id="pause-overlay" class="overlay" hidden>
+        <div class="overlay-box">
+          <h2>已暂停</h2>
+          <button id="btn-resume" class="btn btn-primary">继续</button>
+          <button id="btn-retry" class="btn btn-ghost">重新开始</button>
+          <button id="btn-quit" class="btn btn-ghost danger">返回首页</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 结算页 ============ -->
+    <section id="result-screen" class="screen">
+      <div class="result-box">
+        <h2 id="result-title" class="result-title">通关！</h2>
+        <p id="result-sub" class="result-sub"></p>
+
+        <div class="result-grid">
+          <div class="result-cell"><span>分数</span><b id="r-score">0</b></div>
+          <div class="result-cell"><span>最大连击</span><b id="r-maxcombo">0</b></div>
+          <div class="result-cell"><span>准确率</span><b id="r-acc">0%</b></div>
+          <div class="result-cell"><span>目标分</span><b id="r-target">0</b></div>
+          <div class="result-cell perfect"><span>Perfect</span><b id="r-perfect">0</b></div>
+          <div class="result-cell good"><span>Good</span><b id="r-good">0</b></div>
+          <div class="result-cell ok"><span>OK</span><b id="r-ok">0</b></div>
+          <div class="result-cell miss"><span>Miss</span><b id="r-miss">0</b></div>
+        </div>
+
+        <div class="result-actions">
+          <button id="btn-result-retry" class="btn btn-ghost">重试</button>
+          <button id="btn-result-home" class="btn btn-ghost">返回首页</button>
+          <button id="btn-result-next" class="btn btn-primary" hidden>下一关 →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 设置 ============ -->
+    <div id="settings-modal" class="overlay" hidden>
+      <div class="overlay-box settings-box">
+        <h2>设置</h2>
+        <label class="setting-row">
+          <span>BGM 音量</span>
+          <input id="bgm-volume" type="range" min="0" max="100" value="80" />
+          <em id="bgm-volume-val">80</em>
+        </label>
+        <label class="setting-row">
+          <span>音效音量</span>
+          <input id="sfx-volume" type="range" min="0" max="100" value="90" />
+          <em id="sfx-volume-val">90</em>
+        </label>
+        <p class="settings-tip">进度与音量自动保存在本地浏览器（localStorage）。</p>
+        <button id="btn-settings-close" class="btn btn-primary">完成</button>
+      </div>
+    </div>
+
+    <div id="toast" class="toast" hidden></div>
+
+    <!-- 致命资源失败遮罩：只有核心代码/资源无法加载时出现（不是“服务不可用”） -->
+    <div id="asset-error" class="overlay" hidden>
+      <div class="overlay-box">
+        <h2>资源加载失败</h2>
+        <p id="asset-error-msg" class="asset-error-msg">
+          部分游戏资源未能加载，请检查网络后重试。
+        </p>
+        <button id="btn-asset-retry" class="btn btn-primary">重试</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
